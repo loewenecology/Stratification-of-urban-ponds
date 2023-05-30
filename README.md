@@ -1,4 +1,4 @@
-Code and data for characterizing water column mixing regimes in ponds and comparing the influence of maximum salinity, surface temperature, Secchi depth, maximum depth, and surface area in by generalized linear regression.
+Code and data for characterizing water column mixing regimes in ponds and comparing the influence of maximum salinity, surface temperature, Secchi depth, maximum depth, and surface area by generalized linear regression.
 
 Pond_mixing_regime_profile_data.csv contains depth profile data with rows corresponding to unique entries and columns corresponding to Site (sampling location name), Date (sampling date), Time (sampling time), Event (sampling month), Parameter (water quality parameter), Units (water quality parameter unit), Depth (measurement depth), and Value (measurement value).
 
