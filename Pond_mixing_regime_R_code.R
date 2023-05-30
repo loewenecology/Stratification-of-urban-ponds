@@ -1,5 +1,5 @@
 
-##### Salinization, warming, and loss of water clarity inhibit mixing of small urban ponds #####
+##### Salinization inhibits mixing of small urban ponds #####
 
 ##################
 # Clear any variables from the R environment
