@@ -34,8 +34,8 @@ library(gtable)
 
 setwd() #set working directory
 
-profiles = read.table("Final_profile_data.csv", header = T, sep = ",") #read in depth profile data
-sites = read.table("Final_site_data.csv", header = T, sep = ",") #read in depth profile data
+profiles = read.table("Pond_mixing_regime_profile_data.csv", header = T, sep = ",") #read in depth profile data
+sites = read.table("Pond_mixing_regime_site_data.csv", header = T, sep = ",") #read in depth profile data
 
 ##################
 # Create theme for plotting
