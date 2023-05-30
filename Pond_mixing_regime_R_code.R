@@ -32,7 +32,7 @@ library(gtable)
 # Load data in R environment
 ##################
 
-setwd("C://Users//charl//OneDrive - Iowa State University//Postdoc//Alliance//profiles//") #set working directory
+setwd() #set working directory
 
 profiles = read.table("Final_profile_data.csv", header = T, sep = ",") #read in depth profile data
 sites = read.table("Final_site_data.csv", header = T, sep = ",") #read in depth profile data
