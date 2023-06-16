@@ -495,13 +495,13 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 # Plot water density profiles NOT taking salinity into account for July
 (plot.dens.a.combo.jul <- ggplot(data = subset(unnested1.a, Event == "July"),
                                  aes(x = wd.a.value, colour = Site, y = Depth)) +
-    geom_path(alpha = 0.4, linewidth = 4) +
+    geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "July",
          x = bquote(paste("Density without salinity (kg/", m^3, ")")),
          y = "Depth from surface (m)") +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
     scale_x_continuous(limits = c(996, 1005), breaks = c(996, 998, 1000, 1002, 1004)) +
-    geom_point(alpha = 0.4) +
+    geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
     theme(legend.position = "none"))
@@ -509,13 +509,13 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 # Plot water density profiles NOT taking salinity into account for August
 (plot.dens.a.combo.aug <- ggplot(data = subset(unnested1.a, Event == "August"),
                                  aes(x = wd.a.value, colour = Site, y = Depth)) +
-    geom_path(alpha = 0.4, linewidth = 4) +
+    geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "August",
          x = bquote(paste("Density without salinity (kg/", m^3, ")")),
          y = "Depth from surface (m)") +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
     scale_x_continuous(limits = c(996, 1005), breaks = c(996, 998, 1000, 1002, 1004)) +
-    geom_point(alpha = 0.4) +
+    geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
     theme(legend.position = "none"))
@@ -523,13 +523,13 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 # Plot water density profiles taking salinity into account for July
 (plot.dens.s.combo.jul <- ggplot(data = subset(unnested1.s, Event == "July"),
                                  aes(x = wd.s.value, colour = reorder(factor(as.factor(Site)), Value), y = Depth)) +
-    geom_path(alpha = 0.4, linewidth = 4) +
+    geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "July",
          x = bquote(paste("Density with salinity (kg/", m^3, ")")),
          y = "Depth from surface (m)") +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
     scale_x_continuous(limits = c(996, 1005), breaks = c(996, 998, 1000, 1002, 1004)) +
-    geom_point(alpha = 0.4) +
+    geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
     theme(legend.position = "none"))
@@ -537,13 +537,13 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 # Plot water density profiles taking salinity into account for August
 (plot.dens.s.combo.aug <- ggplot(data = subset(unnested1.s, Event == "August"),
                                  aes(x = wd.s.value, colour = Site, y = Depth)) +
-    geom_path(alpha = 0.4, linewidth = 4) +
+    geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "August",
          x = bquote(paste("Density with salinity (kg/", m^3, ")")),
          y = "Depth from surface (m)") +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
     scale_x_continuous(limits = c(996, 1005), breaks = c(996, 998, 1000, 1002, 1004)) +
-    geom_point(alpha = 0.4) +
+    geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
     theme(legend.position = "none"))
@@ -551,13 +551,13 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 # Plot profiles of differences in water densities with and without taking salinity into account for July 
 (plot.dens.diff.combo.jul <- ggplot(data = subset(unnested1.s, Event == "July"),
                                     aes(x = wd.diff.value, colour = Site, y = Depth)) +
-    geom_path(alpha = 0.4, linewidth = 4) +
+    geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "July",
          x = bquote(paste("Contribution of salinity (kg/", m^3, ")")),
          y = "Depth from surface (m)") +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
     scale_x_continuous(limits = c(0, 6.4), breaks = c(0, 2, 4, 6)) +
-    geom_point(alpha = 0.4) +
+    geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
     theme(legend.position = "none"))
@@ -565,13 +565,13 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 # Plot profiles of differences in water densities with and without taking salinity into account for August 
 (plot.dens.diff.combo.aug <- ggplot(data = subset(unnested1.s, Event == "August"),
                                     aes(x = wd.diff.value, colour = Site, y = Depth)) +
-    geom_path(alpha = 0.4, linewidth = 4) +
+    geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "August",
          x = bquote(paste("Contribution of salinity (kg/", m^3, ")")),
          y = "Depth from surface (m)") +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
     scale_x_continuous(limits = c(0, 6.4), breaks = c(0, 2, 4, 6)) +
-    geom_point(alpha = 0.4) +
+    geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
     theme(legend.position = "none"))
@@ -990,13 +990,13 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 # Plot temperature profiles for July
 (plot.temp.combo.jul <- ggplot(data = subset(profiles, Parameter == "Water Temperature" & Event == "July"),
                                aes(x = as.numeric(Value), colour = Site, y = Depth)) +
-    geom_path(alpha = 0.4, linewidth = 4) +
+    geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "July",
          x = "Water temperature (°C)",
          y = "Depth from surface (m)") +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
     scale_x_continuous(limits = c(11.3, 28.7), breaks = c(12, 16, 20, 24, 28)) +
-    geom_point(alpha = 0.4) +
+    geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
     theme(legend.position = "none"))
@@ -1004,13 +1004,13 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 # Plot temperature profiles for August
 (plot.temp.combo.aug <- ggplot(data = subset(profiles, Parameter == "Water Temperature" & Event == "August"),
                                aes(x = as.numeric(Value), colour = Site, y = Depth)) +
-    geom_path(alpha = 0.4, linewidth = 4) +
+    geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "August",
          x = "Water temperature (°C)",
          y = "Depth from surface (m)") +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
     scale_x_continuous(limits = c(11.3, 28.7), breaks = c(12, 16, 20, 24, 28)) +
-    geom_point(alpha = 0.4) +
+    geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
     theme(legend.position = "none"))
@@ -1018,13 +1018,13 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 # Plot salinity profiles for July
 (plot.sal.combo.jul <- ggplot(data = subset(unnested1.s, Event == "July"), 
                               aes(x = Salinity, colour = Site, y = Depth)) +
-    geom_path(alpha = 0.4, linewidth = 4) +
+    geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "July",
          x = "Salinity (PSU)",
          y = "Depth from surface (m)") +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
     scale_x_continuous(limits = c(0, 8.4), breaks = c(0, 2, 4, 6 ,8)) +
-    geom_point(alpha = 0.4) +
+    geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
     theme(legend.position = "none"))
@@ -1032,13 +1032,13 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 # Plot salinity profiles for August
 (plot.sal.combo.aug <- ggplot(data = subset(unnested1.s, Event == "August"), 
                               aes(x = Salinity, colour = Site, y = Depth)) +
-    geom_path(alpha = 0.4, linewidth = 4) +
+    geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "August",
          x = "Salinity (PSU)",
          y = "Depth from surface (m)") +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
     scale_x_continuous(limits = c(0, 8.4), breaks = c(0, 2, 4, 6 ,8)) +
-    geom_point(alpha = 0.4) +
+    geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
     theme(legend.position = "none"))
@@ -1046,13 +1046,13 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 # Plot dissolved oxygen concentration profiles for August
 (plot.docon.combo.aug <- ggplot(data = subset(profiles, Parameter == "Dissolved Oxygen" & Units == "mg/L"),
                                 aes(x = as.numeric(Value), colour = Site, y = Depth)) +
-    geom_path(alpha = 0.4, linewidth = 4) +
+    geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "August",
          x = "Dissolved oxygen (mg/L)",
          y = "Depth from surface (m)") +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
     scale_x_continuous(limits = c(0, 22), breaks = c(0, 5, 10, 15, 20)) +
-    geom_point(alpha = 0.4) +
+    geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
     theme(legend.position = "none"))
