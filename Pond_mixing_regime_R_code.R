@@ -32,7 +32,7 @@ library(gtable)
 # Load data in R environment
 ##################
 
-setwd() #set working directory
+setwd(dirname(rstudioapi::getSourceEditorContext()$path)) #set working directory
 
 profiles = read.table("Pond_mixing_regime_profile_data.csv", header = T, sep = ",") #read in depth profile data
 sites = read.table("Pond_mixing_regime_site_data.csv", header = T, sep = ",") #read in depth profile data
@@ -179,7 +179,9 @@ sal.data <- subset(profiles, Parameter == "Specific Conductance")
 sal.data <- mutate(sal.data, Salinity = salinity(as.numeric(sal.data$Value)))
 
 select.sal.data <- sal.data %>%
-  select(Site, Depth, Event, Salinity)
+  select(Site, Depth, Event, Salinity, Value)
+
+select.sal.data <- select.sal.data %>% rename(Specific.conductance = Value)
 
 # Calculate water densities accounting for salinity
 wd.s <- function(data) {
@@ -265,10 +267,10 @@ int.wd.prop.max.jul.s <- subset(int.wd.s.unnested.1, Event == "July") %>%
   group_by(Site) %>%
   summarise(int.wd.prop.max.jul.s = max(wd.prop.int.value, na.rm = TRUE))
 
-# Calculate maximum salinity at each location in during July sampling event
-sal.max.jul.s <- subset(int.wd.s.unnested.1, Event == "July") %>%
+# Calculate maximum specific conductance at each location in during July sampling event
+spc.max.jul.s <- subset(int.wd.s.unnested.1, Event == "July") %>%
   group_by(Site) %>%
-  summarise(Sal.max = max(abs(Salinity), na.rm = TRUE))
+  summarise(Spc.max = max(abs(Specific.conductance), na.rm = TRUE))
 
 # Add variables to seasonal data frames
 physical.jul <- left_join(physical.jul, int.wd.mean.jul.s, by = c("Site"))
@@ -276,7 +278,7 @@ physical.jul <- left_join(physical.jul, int.wd.max.jul.s, by = c("Site"))
 physical.jul <- left_join(physical.jul, int.wd.prop.mean.jul.s, by = c("Site"))
 physical.jul <- left_join(physical.jul, int.wd.prop.min.jul.s, by = c("Site"))
 physical.jul <- left_join(physical.jul, int.wd.prop.max.jul.s, by = c("Site"))
-physical.jul <- left_join(physical.jul, sal.max.jul.s, by = c("Site"))
+physical.jul <- left_join(physical.jul, spc.max.jul.s, by = c("Site"))
 
 # Calculate mean water density change with depth (intervals) at each location in during August sampling event
 int.wd.mean.aug.s <- subset(int.wd.s.unnested.1, Event == "August") %>%
@@ -303,10 +305,10 @@ int.wd.prop.max.aug.s <- subset(int.wd.s.unnested.1, Event == "August") %>%
   group_by(Site) %>%
   summarise(int.wd.prop.max.aug.s = max(wd.prop.int.value, na.rm = TRUE))
 
-# Calculate maximum salinity at each location in during August sampling event
-sal.max.aug.s <- subset(int.wd.s.unnested.1, Event == "August") %>%
+# Calculate maximum specific conductance at each location in during August sampling event
+spc.max.aug.s <- subset(int.wd.s.unnested.1, Event == "August") %>%
   group_by(Site) %>%
-  summarise(Sal.max = max(abs(Salinity), na.rm = TRUE))
+  summarise(Spc.max = max(abs(Specific.conductance), na.rm = TRUE))
 
 # Add variables to seasonal data frames
 physical.aug <- left_join(physical.aug, int.wd.mean.aug.s, by = c("Site"))
@@ -314,7 +316,7 @@ physical.aug <- left_join(physical.aug, int.wd.max.aug.s, by = c("Site"))
 physical.aug <- left_join(physical.aug, int.wd.prop.mean.aug.s, by = c("Site"))
 physical.aug <- left_join(physical.aug, int.wd.prop.min.aug.s, by = c("Site"))
 physical.aug <- left_join(physical.aug, int.wd.prop.max.aug.s, by = c("Site"))
-physical.aug <- left_join(physical.aug, sal.max.aug.s, by = c("Site"))
+physical.aug <- left_join(physical.aug, spc.max.aug.s, by = c("Site"))
 
 # Calculate mean water density change with depth (intervals) at each location in during September sampling event
 int.wd.mean.sep.s <- subset(int.wd.s.unnested.1, Event == "September") %>%
@@ -341,10 +343,10 @@ int.wd.prop.max.sep.s <- subset(int.wd.s.unnested.1, Event == "September") %>%
   group_by(Site) %>%
   summarise(int.wd.prop.max.sep.s = max(wd.prop.int.value, na.rm = TRUE))
 
-# Calculate maximum salinity at each location in during September sampling event
-sal.max.sep.s <- subset(int.wd.s.unnested.1, Event == "September") %>%
+# Calculate maximum specific conductance at each location in during September sampling event
+spc.max.sep.s <- subset(int.wd.s.unnested.1, Event == "September") %>%
   group_by(Site) %>%
-  summarise(Sal.max = max(abs(Salinity), na.rm = TRUE))
+  summarise(Spc.max = max(abs(Specific.conductance), na.rm = TRUE))
 
 # Add variables to seasonal data frames
 physical.sep <- left_join(physical.sep, int.wd.mean.sep.s, by = c("Site"))
@@ -352,7 +354,7 @@ physical.sep <- left_join(physical.sep, int.wd.max.sep.s, by = c("Site"))
 physical.sep <- left_join(physical.sep, int.wd.prop.mean.sep.s, by = c("Site"))
 physical.sep <- left_join(physical.sep, int.wd.prop.min.sep.s, by = c("Site"))
 physical.sep <- left_join(physical.sep, int.wd.prop.max.sep.s, by = c("Site"))
-physical.sep <- left_join(physical.sep, sal.max.sep.s, by = c("Site"))
+physical.sep <- left_join(physical.sep, spc.max.sep.s, by = c("Site"))
 
 # Calculate number of sites experiencing anoxia in August
 nrow(subset(profiles, Parameter == "Dissolved Oxygen" & Units == "mg/L" & Value < 0.5 & Event == "August")  %>%
@@ -368,9 +370,9 @@ min(int.wd.s.unnested.1$wd.prop.int.value, na.rm = TRUE)
 max(int.wd.s.unnested.1$wd.prop.int.value, na.rm = TRUE)
 mean(int.wd.s.unnested.1$wd.prop.int.value, na.rm = TRUE)
 
-min(physical.jul$Sal.max, na.rm = TRUE)
-max(physical.jul$Sal.max, na.rm = TRUE)
-mean(physical.jul$Sal.max, na.rm = TRUE)
+min(physical.jul$Spc.max, na.rm = TRUE)
+max(physical.jul$Spc.max, na.rm = TRUE)
+mean(physical.jul$Spc.max, na.rm = TRUE)
 
 min(physical.jul$Surface.temperature, na.rm = TRUE)
 max(physical.jul$Surface.temperature, na.rm = TRUE)
@@ -384,9 +386,9 @@ min(physical.jul$Max.depth, na.rm = TRUE)
 max(physical.jul$Max.depth, na.rm = TRUE)
 mean(physical.jul$Max.depth, na.rm = TRUE)
 
-min(physical.aug$Sal.max, na.rm = TRUE)
-max(physical.aug$Sal.max, na.rm = TRUE)
-mean(physical.aug$Sal.max, na.rm = TRUE)
+min(physical.aug$Spc.max, na.rm = TRUE)
+max(physical.aug$Spc.max, na.rm = TRUE)
+mean(physical.aug$Spc.max, na.rm = TRUE)
 
 min(physical.aug$Surface.temperature, na.rm = TRUE)
 max(physical.aug$Surface.temperature, na.rm = TRUE)
@@ -400,9 +402,9 @@ min(physical.aug$Max.depth, na.rm = TRUE)
 max(physical.aug$Max.depth, na.rm = TRUE)
 mean(physical.aug$Max.depth, na.rm = TRUE)
 
-min(physical.sep$Sal.max, na.rm = TRUE)
-max(physical.sep$Sal.max, na.rm = TRUE)
-mean(physical.sep$Sal.max, na.rm = TRUE)
+min(physical.sep$Spc.max, na.rm = TRUE)
+max(physical.sep$Spc.max, na.rm = TRUE)
+mean(physical.sep$Spc.max, na.rm = TRUE)
 
 min(physical.sep$Secchi.depth, na.rm = TRUE)
 max(physical.sep$Secchi.depth, na.rm = TRUE)
@@ -438,12 +440,12 @@ mean(sites$D.Chloride, na.rm = TRUE)
 
 ## Figure 1. requires combining plots and minor graphic edits
 # Obtain primary basemap
-basemap <- get_stamenmap( bbox = c(left = -79.86, bottom = 43.61, right = -79.64, top = 43.8), zoom = 12, maptype = "terrain")
+basemap <- get_stamenmap(bbox = c(left = -79.86, bottom = 43.61, right = -79.64, top = 43.8), zoom = 11, maptype = "terrain")
 
-# Generate map showing salinity and maximum depth across sampling locations
-(Salinity_Map <- ggmap(basemap) +
-    geom_point(data = physical.aug, alpha = 1, aes(Longitude, Latitude, color = Sal.max, size = Max.depth)) +
-    scale_colour_gradient(name = "Max salinity (PSU)", low = "blue4", high = "red") +
+# Generate map showing specific conductance and maximum depth across sampling locations
+(Spc_Map <- ggmap(basemap) +
+    geom_point(data = physical.aug, alpha = 1, aes(Longitude, Latitude, color = Spc.max, size = Max.depth)) +
+    scale_colour_gradient(name = Specific~conductance~(mu*S/cm), low = "blue4", high = "red") +
     xlab("Longitude") + ylab("Latitude") +
     scalebar(x.min = attr(basemap, "bb")[[2]],
              y.min = attr(basemap, "bb")[[1]],
@@ -456,7 +458,7 @@ basemap <- get_stamenmap( bbox = c(left = -79.86, bottom = 43.61, right = -79.64
 # Generate map showing surface water temperature and maximum depth across sampling locations
 (Temperature_Map <- ggmap(basemap) +
     geom_point(data = physical.aug, alpha = 1, aes(Longitude, Latitude, color = Surface.temperature, size = Max.depth)) +
-    scale_colour_gradient(name = "Surface temperature (°C)", low = "blue4", high = "red") +
+    scale_colour_gradient(name = "Temperature (°C)", low = "blue4", high = "red") +
     xlab("Longitude") + ylab("Latitude") +
     scalebar(x.min = attr(basemap, "bb")[[2]],
              y.min = attr(basemap, "bb")[[1]],
@@ -464,10 +466,10 @@ basemap <- get_stamenmap( bbox = c(left = -79.86, bottom = 43.61, right = -79.64
              y.max = attr(basemap, "bb")[[3]],
              dist = 2, anchor = c(x = -79.85, y = 43.79),
              transform = T, location = "bottomleft", st.size = 5, st.dist = 0.032, dist_unit = "km") +
-    theme(legend.position = "bottom"))
+    theme(legend.position = "none"))
 
 # Obtain secondary basemap
-basemap2 <- get_stamenmap( bbox = c(left = -81.75, bottom = 41.80, right = -77.75, top = 45.69), zoom = 8,
+basemap2 <- get_stamenmap( bbox = c(left = -81.75, bottom = 41.80, right = -77.75, top = 45.69), zoom = 6,
                              maptype = "terrain-background")
 
 # Generate secondary map showing location of study area
@@ -493,7 +495,7 @@ unnested1.s$Site = with(unnested1.s, reorder(Site, Depth, FUN = max))
 unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 
 # Plot water density profiles NOT taking salinity into account for July
-(plot.dens.a.combo.jul <- ggplot(data = subset(unnested1.a, Event == "July"),
+(plot.dens.a.combo.jul <- ggplot(data = subset(unnested1.s, Event == "July"),
                                  aes(x = wd.a.value, colour = Site, y = Depth)) +
     geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "July",
@@ -507,7 +509,7 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
     theme(legend.position = "none"))
 
 # Plot water density profiles NOT taking salinity into account for August
-(plot.dens.a.combo.aug <- ggplot(data = subset(unnested1.a, Event == "August"),
+(plot.dens.a.combo.aug <- ggplot(data = subset(unnested1.s, Event == "August"),
                                  aes(x = wd.a.value, colour = Site, y = Depth)) +
     geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "August",
@@ -522,7 +524,7 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 
 # Plot water density profiles taking salinity into account for July
 (plot.dens.s.combo.jul <- ggplot(data = subset(unnested1.s, Event == "July"),
-                                 aes(x = wd.s.value, colour = reorder(factor(as.factor(Site)), Value), y = Depth)) +
+                                 aes(x = wd.s.value, colour = Site, y = Depth)) +
     geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "July",
          x = bquote(paste("Density with salinity (kg/", m^3, ")")),
@@ -611,29 +613,29 @@ grid.arrange(fig2.c1, fig2.c2, ncol = 2)
 physical.jul <- physical.jul %>%
   mutate(Strat = if_else(int.wd.mean.jul.s > 0.0287, 'Stratified', 'Mixed'))
 
-physical.jul %>% filter(Strat == "Mixed") %>% summarise(Mixed.Sal.max = max(Sal.max))
+physical.jul %>% filter(Strat == "Mixed") %>% summarise(Mixed.Spc.max = max(Spc.max))
 physical.jul %>% filter(Strat == "Mixed") %>% summarise(Mixed.Temp.max = max(Surface.temperature))
 physical.jul %>% filter(Strat == "Mixed") %>% summarise(Mixed.Depth.max = max(Max.depth))
 
-(plot.strat.temp.sal.jul <- ggplot(data = physical.jul) +
-    geom_point(aes(x = Surface.temperature, y = Sal.max, color = Strat), size = 4) +
-    geom_hline(aes(yintercept = Mixed.Sal.max), alpha = 0.1, linewidth = 3, data = . %>% filter(Strat == "Mixed") %>% summarise(Mixed.Sal.max = max(Sal.max))) +
+(plot.strat.temp.spc.jul <- ggplot(data = physical.jul) +
+    geom_point(aes(x = Surface.temperature, y = Spc.max, color = Strat), size = 4) +
+    geom_hline(aes(yintercept = Mixed.Spc.max), alpha = 0.1, linewidth = 3, data = . %>% filter(Strat == "Mixed") %>% summarise(Mixed.Spc.max = max(Spc.max))) +
     geom_vline(aes(xintercept = Mixed.Temp.max), alpha = 0.1, linewidth = 3, data = . %>% filter(Strat == "Mixed") %>% summarise(Mixed.Temp.max = max(Surface.temperature))) +
     labs(title = "July",
          x = "Water temperature (°C)",
-         y = "Max Salinity (PSU)") +
+         y = Specific~conductance~(mu*S/cm)) +
     scale_x_continuous(limits = c(21.1, 28.3), breaks = c(21, 22, 23, 24, 25, 26, 27, 28)) +
-    scale_y_continuous(limits = c(0, 8.4), breaks = c(0, 2, 4, 6, 8)) +
+    scale_y_continuous(limits = c(0, 14500), breaks = c(0, 3500, 7000, 10500, 14000)) +
     workingtheme.regressions)
 
-(plot.strat.depth.sal.jul <- ggplot(data = physical.jul) +
-    geom_point(aes(x = Max.depth, y = Sal.max, color = Strat), size = 4) +
-    geom_hline(aes(yintercept = Mixed.Sal.max), alpha = 0.1, linewidth = 3, data = . %>% filter(Strat == "Mixed") %>% summarise(Mixed.Sal.max = max(Sal.max))) +
+(plot.strat.depth.spc.jul <- ggplot(data = physical.jul) +
+    geom_point(aes(x = Max.depth, y = Spc.max, color = Strat), size = 4) +
+    geom_hline(aes(yintercept = Mixed.Spc.max), alpha = 0.1, linewidth = 3, data = . %>% filter(Strat == "Mixed") %>% summarise(Mixed.Spc.max = max(Spc.max))) +
     geom_vline(aes(xintercept = Mixed.Depth.max), alpha = 0.1, linewidth = 3, data = . %>% filter(Strat == "Mixed") %>% summarise(Mixed.Depth.max = max(Max.depth))) +
     labs(x = "Max depth (m)",
-         y = "Max Salinity (PSU)") +
+         y = Specific~conductance~(mu*S/cm)) +
     scale_x_continuous(limits = c(0, 4.1), breaks = c(0, 1, 2, 3, 4)) +
-    scale_y_continuous(limits = c(0, 8.4), breaks = c(0, 2, 4, 6, 8)) +
+    scale_y_continuous(limits = c(0, 14500), breaks = c(0, 3500, 7000, 10500, 14000)) +
     workingtheme.regressions)
 
 (plot.strat.depth.temp.jul <- ggplot(data = physical.jul) +
@@ -650,29 +652,29 @@ physical.jul %>% filter(Strat == "Mixed") %>% summarise(Mixed.Depth.max = max(Ma
 physical.aug <- physical.aug %>%
   mutate(Strat = if_else(int.wd.mean.aug.s > 0.0287, 'Stratified', 'Mixed'))
 
-physical.aug %>% filter(Strat == "Mixed") %>% summarise(Mixed.Sal.max = max(Sal.max))
+physical.aug %>% filter(Strat == "Mixed") %>% summarise(Mixed.Spc.max = max(Spc.max))
 physical.aug %>% filter(Strat == "Mixed") %>% summarise(Mixed.Temp.max = max(Surface.temperature))
 physical.aug %>% filter(Strat == "Mixed") %>% summarise(Mixed.Depth.max = max(Max.depth))
 
-(plot.strat.temp.sal.aug <- ggplot(data = physical.aug) +
-    geom_point(aes(x = Surface.temperature, y = Sal.max, color = Strat), size = 4) +
-    geom_hline(aes(yintercept = Mixed.Sal.max), alpha = 0.1, linewidth = 3, data = . %>% filter(Strat == "Mixed") %>% summarise(Mixed.Sal.max = max(Sal.max))) +
+(plot.strat.temp.spc.aug <- ggplot(data = physical.aug) +
+    geom_point(aes(x = Surface.temperature, y = Spc.max, color = Strat), size = 4) +
+    geom_hline(aes(yintercept = Mixed.Spc.max), alpha = 0.1, linewidth = 3, data = . %>% filter(Strat == "Mixed") %>% summarise(Mixed.Spc.max = max(Spc.max))) +
     geom_vline(aes(xintercept = Mixed.Temp.max), alpha = 0.1, linewidth = 3, data = . %>% filter(Strat == "Mixed") %>% summarise(Mixed.Temp.max = max(Surface.temperature))) +
     labs(title = "August",
          x = "Water temperature (°C)",
-         y = "Max Salinity (PSU)") +
+         y = Specific~conductance~(mu*S/cm)) +
     scale_x_continuous(limits = c(21.1, 28.3), breaks = c(21, 22, 23, 24, 25, 26, 27, 28)) +
-    scale_y_continuous(limits = c(0, 8.4), breaks = c(0, 2, 4, 6, 8)) +
+    scale_y_continuous(limits = c(0, 14500), breaks = c(0, 3500, 7000, 10500, 14000)) +
     workingtheme.regressions)
 
-(plot.strat.depth.sal.aug <- ggplot(data = physical.aug) +
-    geom_point(aes(x = Max.depth, y = Sal.max, color = Strat), size = 4) +
-    geom_hline(aes(yintercept = Mixed.Sal.max), alpha = 0.1, linewidth = 3, data = . %>% filter(Strat == "Mixed") %>% summarise(Mixed.Sal.max = max(Sal.max))) +
+(plot.strat.depth.spc.aug <- ggplot(data = physical.aug) +
+    geom_point(aes(x = Max.depth, y = Spc.max, color = Strat), size = 4) +
+    geom_hline(aes(yintercept = Mixed.Spc.max), alpha = 0.1, linewidth = 3, data = . %>% filter(Strat == "Mixed") %>% summarise(Mixed.Spc.max = max(Spc.max))) +
     geom_vline(aes(xintercept = Mixed.Depth.max), alpha = 0.1, linewidth = 3, data = . %>% filter(Strat == "Mixed") %>% summarise(Mixed.Depth.max = max(Max.depth))) +
     labs(x = "Max depth (m)",
-         y = "Max Salinity (PSU)") +
+         y = Specific~conductance~(mu*S/cm)) +
     scale_x_continuous(limits = c(0, 4.1), breaks = c(0, 1, 2, 3, 4)) +
-    scale_y_continuous(limits = c(0, 8.4), breaks = c(0, 2, 4, 6, 8)) +
+    scale_y_continuous(limits = c(0, 14500), breaks = c(0, 3500, 7000, 10500, 14000)) +
     workingtheme.regressions)
 
 (plot.strat.depth.temp.aug <- ggplot(data = physical.aug) +
@@ -686,27 +688,27 @@ physical.aug %>% filter(Strat == "Mixed") %>% summarise(Mixed.Depth.max = max(Ma
     workingtheme.regressions)
 
 # Arrange profile plots for vertical facet
-plot.strat.temp.sal.jul <- ggplotGrob(plot.strat.temp.sal.jul)
-plot.strat.depth.sal.jul <- ggplotGrob(plot.strat.depth.sal.jul)
+plot.strat.temp.spc.jul <- ggplotGrob(plot.strat.temp.spc.jul)
+plot.strat.depth.spc.jul <- ggplotGrob(plot.strat.depth.spc.jul)
 plot.strat.depth.temp.jul <- ggplotGrob(plot.strat.depth.temp.jul)
-plot.strat.temp.sal.aug <- ggplotGrob(plot.strat.temp.sal.aug)
-plot.strat.depth.sal.aug <- ggplotGrob(plot.strat.depth.sal.aug)
+plot.strat.temp.spc.aug <- ggplotGrob(plot.strat.temp.spc.aug)
+plot.strat.depth.spc.aug <- ggplotGrob(plot.strat.depth.spc.aug)
 plot.strat.depth.temp.aug <- ggplotGrob(plot.strat.depth.temp.aug)
 
-fig3.c1 <- rbind(plot.strat.temp.sal.jul,
-                 plot.strat.depth.sal.jul,
+fig3.c1 <- rbind(plot.strat.temp.spc.jul,
+                 plot.strat.depth.spc.jul,
                  plot.strat.depth.temp.jul)
 
-fig3.c1$widths <- unit.pmax(plot.strat.depth.temp.jul$widths,
-                            plot.strat.depth.sal.jul$widths,
+fig3.c1$widths <- unit.pmax(plot.strat.temp.spc.jul$widths,
+                            plot.strat.depth.spc.jul$widths,
                             plot.strat.depth.temp.jul$widths)
 
-fig3.c2 <- rbind(plot.strat.temp.sal.aug,
-                 plot.strat.depth.sal.aug,
+fig3.c2 <- rbind(plot.strat.temp.spc.aug,
+                 plot.strat.depth.spc.aug,
                  plot.strat.depth.temp.aug)
 
-fig3.c2$widths <- unit.pmax(plot.strat.temp.sal.aug$widths,
-                            plot.strat.depth.sal.aug$widths,
+fig3.c2$widths <- unit.pmax(plot.strat.temp.spc.aug$widths,
+                            plot.strat.depth.spc.aug$widths,
                             plot.strat.depth.temp.aug$widths)
 
 grid.arrange(fig3.c1, fig3.c2, ncol = 2)
@@ -716,19 +718,19 @@ grid.arrange(fig3.c1, fig3.c2, ncol = 2)
 ##################
 
 ## Center/scale predictors
-physical.jul$Sal.max.scale <- c(scale(physical.jul$Sal.max, center = TRUE, scale = TRUE))
+physical.jul$Spc.max.scale <- c(scale(physical.jul$Spc.max, center = TRUE, scale = TRUE))
 physical.jul$Max.depth.scale <- c(scale(physical.jul$Max.depth, center = TRUE, scale = TRUE))
 physical.jul$Surface.temperature.scale <- c(scale(physical.jul$Surface.temperature, center = TRUE, scale = TRUE))
 physical.jul$Surface.area.scale <- c(scale(physical.jul$Surface.area, center = TRUE, scale = TRUE))
 physical.jul$Secchi.depth.scale <- c(scale(physical.jul$Secchi.depth, center = TRUE, scale = TRUE))
 
-physical.aug$Sal.max.scale <- c(scale(physical.aug$Sal.max, center = TRUE, scale = TRUE))
+physical.aug$Spc.max.scale <- c(scale(physical.aug$Spc.max, center = TRUE, scale = TRUE))
 physical.aug$Max.depth.scale <- c(scale(physical.aug$Max.depth, center = TRUE, scale = TRUE))
 physical.aug$Surface.temperature.scale <- c(scale(physical.aug$Surface.temperature, center = TRUE, scale = TRUE))
 physical.aug$Surface.area.scale <- c(scale(physical.aug$Surface.area, center = TRUE, scale = TRUE))
 physical.aug$Secchi.depth.scale <- c(scale(physical.aug$Secchi.depth, center = TRUE, scale = TRUE))
 
-physical.sep$Sal.max.scale <- c(scale(physical.sep$Sal.max, center = TRUE, scale = TRUE))
+physical.sep$Spc.max.scale <- c(scale(physical.sep$Spc.max, center = TRUE, scale = TRUE))
 physical.sep$Max.depth.scale <- c(scale(physical.sep$Max.depth, center = TRUE, scale = TRUE))
 physical.sep$Surface.temperature.scale <- c(scale(physical.sep$Surface.temperature, center = TRUE, scale = TRUE))
 physical.sep$Surface.area.scale <- c(scale(physical.sep$Surface.area, center = TRUE, scale = TRUE))
@@ -736,15 +738,15 @@ physical.sep$Secchi.depth.scale <- c(scale(physical.sep$Secchi.depth, center = T
 
 ## Examine predictor correlations
 corr.jul <- physical.jul %>%
-  select(Sal.max.scale, Surface.temperature.scale, Secchi.depth.scale, Max.depth.scale, Surface.area.scale)
+  select(Spc.max.scale, Surface.temperature.scale, Secchi.depth.scale, Max.depth.scale, Surface.area.scale)
 round(cor(corr.jul, use ="complete.obs"), 2)
 
 corr.aug <- physical.aug %>%
-  select(Sal.max.scale, Surface.temperature.scale, Secchi.depth.scale, Max.depth.scale, Surface.area.scale)
+  select(Spc.max.scale, Surface.temperature.scale, Secchi.depth.scale, Max.depth.scale, Surface.area.scale)
 round(cor(corr.aug, use ="complete.obs"), 2)
 
 corr.sep <- physical.sep %>%
-  select(Sal.max.scale, Surface.temperature.scale, Secchi.depth.scale, Max.depth.scale, Surface.area.scale)
+  select(Spc.max.scale, Surface.temperature.scale, Secchi.depth.scale, Max.depth.scale, Surface.area.scale)
 round(cor(corr.sep, use ="complete.obs"), 2)
 
 ## Figure 4. requires minor edits with a graphical editor
@@ -752,26 +754,26 @@ round(cor(corr.sep, use ="complete.obs"), 2)
 hist(physical.jul$int.wd.mean.jul.s)
 
 # Run full July regression model
-model.int.wd.mean.jul.s <- glm(int.wd.mean.jul.s ~ Sal.max.scale + Surface.temperature.scale + Secchi.depth.scale + Max.depth.scale + Surface.area.scale +
-                                 Sal.max.scale:Surface.temperature.scale + Sal.max.scale:Secchi.depth.scale + Sal.max.scale:Max.depth.scale + Sal.max.scale:Surface.area.scale, data = physical.jul, family = gaussian(link = "log"))
+model.int.wd.mean.jul.s <- glm(int.wd.mean.jul.s ~ Spc.max.scale + Surface.temperature.scale + Secchi.depth.scale + Max.depth.scale + Surface.area.scale +
+                                 Spc.max.scale:Surface.temperature.scale + Spc.max.scale:Secchi.depth.scale + Spc.max.scale:Max.depth.scale + Spc.max.scale:Surface.area.scale, data = physical.jul, family = gaussian(link = "log"))
 summary(model.int.wd.mean.jul.s)
 
 # Run P-value adjustments
 p.adjust(coef(summary(model.int.wd.mean.jul.s))[,4], "fdr")
 
 # Plot July regression models
-model.int.wd.mean.jul.s.pred <- ggpredict(model.int.wd.mean.jul.s, terms = "Sal.max.scale [all]")
-model.int.wd.mean.jul.s.pred$x <- model.int.wd.mean.jul.s.pred$x * sd(physical.jul$Sal.max) + mean(physical.jul$Sal.max) 
+model.int.wd.mean.jul.s.pred <- ggpredict(model.int.wd.mean.jul.s, terms = "Spc.max.scale [all]")
+model.int.wd.mean.jul.s.pred$x <- model.int.wd.mean.jul.s.pred$x * sd(physical.jul$Spc.max) + mean(physical.jul$Spc.max) 
 
-(plot.model.int.wd.mean.sal.jul.s.pred <- ggplot() +
+(plot.model.int.wd.mean.spc.jul.s.pred <- ggplot() +
     geom_ribbon(data = model.int.wd.mean.jul.s.pred, aes(ymin = conf.low, ymax = conf.high, x = x), alpha = 0.075) +
-    geom_point(data = physical.jul, alpha = 0.8, size = 4, aes(x = Sal.max, y = int.wd.mean.jul.s, color = Surface.temperature)) +
+    geom_point(data = physical.jul, alpha = 0.8, size = 4, aes(x = Spc.max, y = int.wd.mean.jul.s, color = Surface.temperature)) +
     geom_line(data = model.int.wd.mean.jul.s.pred, aes(x, predicted), linewidth = 1, linetype = "longdash") +
     labs(title = "July",
          y = bquote(paste("Density change (kg/", m^3, ")")),
-         x = "Maximum salinity (PSU)",
+         x = Specific~conductance~(mu*S/cm),
          color = "Surface temperature (°C)") +
-    scale_x_continuous(limits = c(0, 8.4), breaks = c(0, 2, 4, 6, 8)) +
+    scale_x_continuous(limits = c(0, 14505), breaks = c(0, 3500, 7000, 10500, 14000)) +
     scale_y_continuous(limits = c(0, 0.65), breaks = c(0, 0.2, 0.4, 0.6)) +
     workingtheme.regressions)
 
@@ -780,12 +782,12 @@ model.int.wd.mean.jul.s.pred$x <- model.int.wd.mean.jul.s.pred$x * sd(physical.j
 
 (plot.model.int.wd.mean.temp.jul.s.pred <- ggplot() +
     geom_ribbon(data = model.int.wd.mean.jul.s.pred, aes(ymin = conf.low, ymax = conf.high, x = x), alpha = 0.075) +
-    geom_point(data = physical.jul, alpha = 0.8, size = 4, aes(x = Surface.temperature, y = int.wd.mean.jul.s, color = Sal.max)) +
+    geom_point(data = physical.jul, alpha = 0.8, size = 4, aes(x = Surface.temperature, y = int.wd.mean.jul.s, color = Spc.max)) +
     geom_line(data = model.int.wd.mean.jul.s.pred, aes(x, predicted), linewidth = 1, linetype = "longdash") +
     labs(title = "July",
          y = bquote(paste("Density change (kg/", m^3, ")")),
          x = "Surface temperature (°C)",
-         color = "Max salinity (PSU)") +
+         color = Specific~conductance~(mu*S/cm)) +
     scale_x_continuous(limits = c(22.5, 28.3), breaks = c(23, 24, 25, 26, 27, 28)) +
     scale_y_continuous(limits = c(0, 0.43), breaks = c(0, 0.1, 0.2, 0.3, 0.4)) +
     workingtheme.regressions)
@@ -795,12 +797,12 @@ model.int.wd.mean.jul.s.pred$x <- model.int.wd.mean.jul.s.pred$x * sd(physical.j
 
 (plot.model.int.wd.mean.secchi.jul.s.pred <- ggplot() +
     geom_ribbon(data = model.int.wd.mean.jul.s.pred, aes(ymin = conf.low, ymax = conf.high, x = x), alpha = 0.075) +
-    geom_point(data = physical.jul, alpha = 0.8, size = 4, aes(x = Secchi.depth, y = int.wd.mean.jul.s, color = Sal.max)) +
+    geom_point(data = physical.jul, alpha = 0.8, size = 4, aes(x = Secchi.depth, y = int.wd.mean.jul.s, color = Spc.max)) +
     geom_line(data = model.int.wd.mean.jul.s.pred, aes(x, predicted), linewidth = 1, linetype = "longdash") +
     labs(title = "July",
          y = bquote(paste("Density change (kg/", m^3, ")")),
          x = "Secchi depth (m)",
-         color = "Max salinity (PSU)") +
+         color = Specific~conductance~(mu*S/cm)) +
     scale_x_continuous(limits = c(0.2, 3), breaks = c(0, 1, 2, 3)) +
     scale_y_continuous(limits = c(0, 0.43), breaks = c(0, 0.1, 0.2, 0.3, 0.4)) +
     workingtheme.regressions)
@@ -810,12 +812,12 @@ model.int.wd.mean.jul.s.pred$x <- model.int.wd.mean.jul.s.pred$x * sd(physical.j
 
 (plot.model.int.wd.mean.depth.jul.s.pred <- ggplot() +
     geom_ribbon(data = model.int.wd.mean.jul.s.pred, aes(ymin = conf.low, ymax = conf.high, x = x), alpha = 0.075) +
-    geom_point(data = physical.jul, alpha = 0.8, size = 4, aes(x = Max.depth, y = int.wd.mean.jul.s, color = Sal.max)) +
+    geom_point(data = physical.jul, alpha = 0.8, size = 4, aes(x = Max.depth, y = int.wd.mean.jul.s, color = Spc.max)) +
     geom_line(data = model.int.wd.mean.jul.s.pred, aes(x, predicted), linewidth = 1, linetype = "longdash") +
     labs(title = "July",
          y = bquote(paste("Density change (kg/", m^3, ")")),
          x = "Max depth (m)",
-         color = "Max salinity (PSU)") +
+         color = Specific~conductance~(mu*S/cm)) +
     scale_x_continuous(limits = c(0.5, 4.1), breaks = c(0, 1, 2, 3, 4)) +
     scale_y_continuous(limits = c(0, 0.43), breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5)) +
     workingtheme.regressions)
@@ -825,12 +827,12 @@ model.int.wd.mean.jul.s.pred$x <- model.int.wd.mean.jul.s.pred$x * sd(physical.j
 
 (plot.model.int.wd.mean.area.jul.s.pred <- ggplot() +
     geom_ribbon(data = model.int.wd.mean.jul.s.pred, aes(ymin = conf.low, ymax = conf.high, x = x), alpha = 0.075) +
-    geom_point(data = physical.jul, alpha = 0.8, size = 4, aes(x = Surface.area, y = int.wd.mean.jul.s, color = Sal.max)) +
+    geom_point(data = physical.jul, alpha = 0.8, size = 4, aes(x = Surface.area, y = int.wd.mean.jul.s, color = Spc.max)) +
     geom_line(data = model.int.wd.mean.jul.s.pred, aes(x, predicted), linewidth = 1, linetype = "longdash") +
     labs(title = "July",
          y = bquote(paste("Density change (kg/", m^3, ")")),
          x = bquote(paste("Surface area (", m^2, ")")),
-         color = "Max salinity (PSU)") +
+         color = Specific~conductance~(mu*S/cm)) +
     scale_x_continuous(limits = c(0, 24100), breaks = c(0, 6000, 12000, 18000, 24000)) +
     scale_y_continuous(limits = c(0, 0.43), breaks = c(0, 0.1, 0.2, 0.3, 0.4 ,0.5)) +
     workingtheme.regressions)
@@ -839,26 +841,26 @@ model.int.wd.mean.jul.s.pred$x <- model.int.wd.mean.jul.s.pred$x * sd(physical.j
 hist(physical.aug$int.wd.mean.aug.s)
 
 # Run full August regression model
-model.int.wd.mean.aug.s <- glm(int.wd.mean.aug.s ~ Sal.max.scale + Surface.temperature.scale + Secchi.depth.scale + Max.depth.scale + Surface.area.scale +
-                                 Sal.max.scale:Surface.temperature.scale + Sal.max.scale:Secchi.depth.scale + Sal.max.scale:Max.depth.scale + Sal.max.scale:Surface.area.scale, data = physical.aug, family = gaussian(link = "log"))
+model.int.wd.mean.aug.s <- glm(int.wd.mean.aug.s ~ Spc.max.scale + Surface.temperature.scale + Secchi.depth.scale + Max.depth.scale + Surface.area.scale +
+                                 Spc.max.scale:Surface.temperature.scale + Spc.max.scale:Secchi.depth.scale + Spc.max.scale:Max.depth.scale + Spc.max.scale:Surface.area.scale, data = physical.aug, family = gaussian(link = "log"))
 summary(model.int.wd.mean.aug.s)
 
 # Run P-value adjustments
 p.adjust(coef(summary(model.int.wd.mean.aug.s))[,4], "fdr")
 
 # Plot August regression models
-model.int.wd.mean.aug.s.pred <- ggpredict(model.int.wd.mean.aug.s, terms = "Sal.max.scale [all]")
-model.int.wd.mean.aug.s.pred$x <- model.int.wd.mean.aug.s.pred$x * sd(physical.aug$Sal.max) + mean(physical.aug$Sal.max) 
+model.int.wd.mean.aug.s.pred <- ggpredict(model.int.wd.mean.aug.s, terms = "Spc.max.scale [all]")
+model.int.wd.mean.aug.s.pred$x <- model.int.wd.mean.aug.s.pred$x * sd(physical.aug$Spc.max) + mean(physical.aug$Spc.max) 
 
-(plot.model.int.wd.mean.sal.aug.s.pred <- ggplot() +
+(plot.model.int.wd.mean.spc.aug.s.pred <- ggplot() +
     geom_ribbon(data = model.int.wd.mean.aug.s.pred, aes(ymin = conf.low, ymax = conf.high, x = x), alpha = 0.075) +
-    geom_point(data = physical.aug, alpha = 0.8, size = 4, aes(x = Sal.max, y = int.wd.mean.aug.s, color = Surface.temperature)) +
+    geom_point(data = physical.aug, alpha = 0.8, size = 4, aes(x = Spc.max, y = int.wd.mean.aug.s, color = Surface.temperature)) +
     geom_line(data = model.int.wd.mean.aug.s.pred, aes(x, predicted), linewidth = 1, linetype = "longdash") +
     labs(title = "August",
          y = bquote(paste("Density change (kg/", m^3, ")")),
-         x = "Maximum salinity (PSU)",
+         x = Specific~conductance~(mu*S/cm),
          color = "Surface temperature (°C)") +
-    scale_x_continuous(limits = c(0, 7.2), breaks = c(0, 2, 4, 6)) +
+    scale_x_continuous(limits = c(0, 12550), breaks = c(0, 300, 6000, 9000, 12000)) +
     scale_y_continuous(limits = c(0, 0.63), breaks = c(0, 0.1, 0.2, 0.4, 0.6)) +
     workingtheme.regressions)
 
@@ -867,12 +869,12 @@ model.int.wd.mean.aug.s.pred$x <- model.int.wd.mean.aug.s.pred$x * sd(physical.a
 
 (plot.model.int.wd.mean.temp.aug.s.pred <- ggplot() +
     geom_ribbon(data = model.int.wd.mean.aug.s.pred, aes(ymin = conf.low, ymax = conf.high, x = x), alpha = 0.075) +
-    geom_point(data = physical.aug, alpha = 0.8, size = 4, aes(x = Surface.temperature, y = int.wd.mean.aug.s, color = Sal.max)) +
+    geom_point(data = physical.aug, alpha = 0.8, size = 4, aes(x = Surface.temperature, y = int.wd.mean.aug.s, color = Spc.max)) +
     geom_line(data = model.int.wd.mean.aug.s.pred, aes(x, predicted), linewidth = 1, linetype = "longdash") +
     labs(title = "August",
          y = bquote(paste("Density change (kg/", m^3, ")")),
          x = "Surface temperature (°C)",
-         color = "Max salinity (PSU)") +
+         color = Specific~conductance~(mu*S/cm)) +
     scale_x_continuous(limits = c(21, 25.7), breaks = c(21, 22, 23, 24, 25, 26)) +
     scale_y_continuous(limits = c(0, 0.3), breaks = c(0, 0.1, 0.2, 0.3)) +
     workingtheme.regressions)
@@ -882,12 +884,12 @@ model.int.wd.mean.aug.s.pred$x <- model.int.wd.mean.aug.s.pred$x * sd(physical.a
 
 (plot.model.int.wd.mean.secchi.aug.s.pred <- ggplot() +
     geom_ribbon(data = model.int.wd.mean.aug.s.pred, aes(ymin = conf.low, ymax = conf.high, x = x), alpha = 0.075) +
-    geom_point(data = physical.aug, alpha = 0.8, size = 4, aes(x = Secchi.depth, y = int.wd.mean.aug.s, color = Sal.max)) +
+    geom_point(data = physical.aug, alpha = 0.8, size = 4, aes(x = Secchi.depth, y = int.wd.mean.aug.s, color = Spc.max)) +
     geom_line(data = model.int.wd.mean.aug.s.pred, aes(x, predicted), linewidth = 1, linetype = "longdash") +
     labs(title = "August",
          y = bquote(paste("Density change (kg/", m^3, ")")),
          x = "Secchi depth (m)",
-         color = "Max salinity (PSU)") +
+         color = Specific~conductance~(mu*S/cm)) +
     scale_x_continuous(limits = c(0, 2), breaks = c(0, 1, 2)) +
     scale_y_continuous(limits = c(0, 0.3), breaks = c(0, 0.1, 0.2, 0.3)) +
     workingtheme.regressions)
@@ -897,12 +899,12 @@ model.int.wd.mean.aug.s.pred$x <- model.int.wd.mean.aug.s.pred$x * sd(physical.a
 
 (plot.model.int.wd.mean.depth.aug.s.pred <- ggplot() +
     geom_ribbon(data = model.int.wd.mean.aug.s.pred, aes(ymin = conf.low, ymax = conf.high, x = x), alpha = 0.075) +
-    geom_point(data = physical.aug, alpha = 0.8, size = 4, aes(x = Max.depth, y = int.wd.mean.aug.s, color = Sal.max)) +
+    geom_point(data = physical.aug, alpha = 0.8, size = 4, aes(x = Max.depth, y = int.wd.mean.aug.s, color = Spc.max)) +
     geom_line(data = model.int.wd.mean.aug.s.pred, aes(x, predicted), linewidth = 1, linetype = "longdash") +
     labs(title = "August",
          y = bquote(paste("Density change (kg/", m^3, ")")),
          x = "Max depth (m)",
-         color = "Max salinity (PSU)") +
+         color = Specific~conductance~(mu*S/cm)) +
     scale_x_continuous(limits = c(0.4, 4), breaks = c(0, 1, 2, 3, 4)) +
     scale_y_continuous(limits = c(0, 0.3), breaks = c(0, 0.1, 0.2, 0.3)) +
     workingtheme.regressions)
@@ -912,19 +914,19 @@ model.int.wd.mean.aug.s.pred$x <- model.int.wd.mean.aug.s.pred$x * sd(physical.a
 
 (plot.model.int.wd.mean.area.aug.s.pred <- ggplot() +
     geom_ribbon(data = model.int.wd.mean.aug.s.pred, aes(ymin = conf.low, ymax = conf.high, x = x), alpha = 0.075) +
-    geom_point(data = physical.aug, alpha = 0.8, size = 4, aes(x = Surface.area, y = int.wd.mean.aug.s, color = Sal.max)) +
+    geom_point(data = physical.aug, alpha = 0.8, size = 4, aes(x = Surface.area, y = int.wd.mean.aug.s, color = Spc.max)) +
     geom_line(data = model.int.wd.mean.aug.s.pred, aes(x, predicted), linewidth = 1, linetype = "longdash") +
     labs(title = "August",
          y = bquote(paste("Density change (kg/", m^3, ")")),
          x = bquote(paste("Surface area (", m^2, ")")),
-         color = "Max salinity (PSU)") +
+         color = Specific~conductance~(mu*S/cm)) +
     scale_x_continuous(limits = c(0, 24100), breaks = c(0, 6000, 12000, 18000, 24000)) +
     scale_y_continuous(limits = c(0, 0.3), breaks = c(0.1, 0.2, 0.3, 0.4, 0.5)) +
     workingtheme.regressions)
 
 # Arrange profile plots with vertical orientation
-plot.model.int.wd.mean.sal.jul.s.pred <- ggplotGrob(plot.model.int.wd.mean.sal.jul.s.pred)
-plot.model.int.wd.mean.sal.aug.s.pred <- ggplotGrob(plot.model.int.wd.mean.sal.aug.s.pred)
+plot.model.int.wd.mean.spc.jul.s.pred <- ggplotGrob(plot.model.int.wd.mean.spc.jul.s.pred)
+plot.model.int.wd.mean.spc.aug.s.pred <- ggplotGrob(plot.model.int.wd.mean.spc.aug.s.pred)
 plot.model.int.wd.mean.temp.jul.s.pred <- ggplotGrob(plot.model.int.wd.mean.temp.jul.s.pred)
 plot.model.int.wd.mean.temp.aug.s.pred <- ggplotGrob(plot.model.int.wd.mean.temp.aug.s.pred)
 plot.model.int.wd.mean.depth.jul.s.pred <- ggplotGrob(plot.model.int.wd.mean.depth.jul.s.pred)
@@ -934,25 +936,25 @@ plot.model.int.wd.mean.area.aug.s.pred <- ggplotGrob(plot.model.int.wd.mean.area
 plot.model.int.wd.mean.secchi.jul.s.pred <- ggplotGrob(plot.model.int.wd.mean.secchi.jul.s.pred)
 plot.model.int.wd.mean.secchi.aug.s.pred <- ggplotGrob(plot.model.int.wd.mean.secchi.aug.s.pred)
 
-fig4.c1 <- rbind(plot.model.int.wd.mean.sal.jul.s.pred,
+fig4.c1 <- rbind(plot.model.int.wd.mean.spc.jul.s.pred,
                  plot.model.int.wd.mean.temp.jul.s.pred,
                  plot.model.int.wd.mean.secchi.jul.s.pred,
                  plot.model.int.wd.mean.depth.jul.s.pred,
                  plot.model.int.wd.mean.area.jul.s.pred)
 
-fig4.c1$widths <- unit.pmax(plot.model.int.wd.mean.sal.jul.s.pred$widths,
+fig4.c1$widths <- unit.pmax(plot.model.int.wd.mean.spc.jul.s.pred$widths,
                             plot.model.int.wd.mean.temp.jul.s.pred$widths,
                             plot.model.int.wd.mean.secchi.jul.s.pred$widths,
                             plot.model.int.wd.mean.depth.jul.s.pred$widths,
                             plot.model.int.wd.mean.area.jul.s.pred$widths)
 
-fig4.c2 <- rbind(plot.model.int.wd.mean.sal.aug.s.pred,
+fig4.c2 <- rbind(plot.model.int.wd.mean.spc.aug.s.pred,
                  plot.model.int.wd.mean.temp.aug.s.pred,
                  plot.model.int.wd.mean.secchi.aug.s.pred,
                  plot.model.int.wd.mean.depth.aug.s.pred,
                  plot.model.int.wd.mean.area.aug.s.pred)
 
-fig4.c2$widths <- unit.pmax(plot.model.int.wd.mean.sal.aug.s.pred$widths,
+fig4.c2$widths <- unit.pmax(plot.model.int.wd.mean.spc.aug.s.pred$widths,
                             plot.model.int.wd.mean.temp.aug.s.pred$widths,
                             plot.model.int.wd.mean.secchi.aug.s.pred$widths,
                             plot.model.int.wd.mean.depth.aug.s.pred$widths,
@@ -965,19 +967,28 @@ grid.arrange(fig4.c1, fig4.c2, ncol = 2)
 ##################
 
 ## Figure S1. requires minor edits with a graphics editor
-## Run and plot dissolved chloride regressed on max salinity
-model.sal.cl.aug <- glm(Sal.max ~ D.Chloride, data = physical.aug, family = gaussian(link = "identity"))
-summary(model.sal.cl.aug)
+## Run and plot dissolved chloride regressed on max specific conductance
 
-model.sal.cl.aug.pred <- ggpredict(model.sal.cl.aug, terms = "D.Chloride [all]")
+spc.05.aug <- subset(profiles, Parameter == "Specific Conductance" & Event == "August" & Depth == "0.5")  %>%
+  group_by(Site)
 
-(plot.model.sal.cl.aug.pred <- ggplot() +
-    geom_ribbon(data = model.sal.cl.aug.pred, aes(ymin = conf.low, ymax = conf.high, x = x), alpha = 0.075) +
-    geom_point(data = physical.aug, alpha = 0.8, size = 4, aes(x = D.Chloride, y = Sal.max, color = T.Sodium)) +
-    geom_line(data = model.sal.cl.aug.pred, aes(x, predicted), linewidth = 1, linetype = "longdash") +
+spc.05.aug <- rename(spc.05.aug, Specific.conductance.05 = Value)
+spc.05.aug$Specific.conductance <-  as.numeric(spc.05.aug$Specific.conductance.05)
+
+spc.05.aug <- left_join(spc.05.aug, physical.aug, by = c("Site"))
+
+model.spc.cl.aug <- glm(Specific.conductance.05 ~ D.Chloride, data = spc.05.aug, family = gaussian(link = "identity"))
+summary(model.spc.cl.aug)
+
+model.spc.cl.aug.pred <- ggpredict(model.spc.cl.aug, terms = "D.Chloride [all]")
+
+(plot.model.spc.cl.aug.pred <- ggplot() +
+    geom_ribbon(data = model.spc.cl.aug.pred, aes(ymin = conf.low, ymax = conf.high, x = x), alpha = 0.075) +
+    geom_point(data = spc.05.aug, alpha = 0.8, size = 4, aes(x = D.Chloride, y = Specific.conductance.05, color = T.Sodium)) +
+    geom_line(data = model.spc.cl.aug.pred, aes(x, predicted), linewidth = 1, linetype = "longdash") +
     labs(title = "August",
          x = "Dissolved chloride (mg/L)",
-         y = "Maximum salinity (PSU)",
+         y = Specific~conductance~(mu*S/cm),
          color = "Total Sodium (mg/L)") +
     workingtheme.regressions)
 
@@ -1015,29 +1026,29 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
     workingtheme.depth +
     theme(legend.position = "none"))
 
-# Plot salinity profiles for July
-(plot.sal.combo.jul <- ggplot(data = subset(unnested1.s, Event == "July"), 
-                              aes(x = Salinity, colour = Site, y = Depth)) +
+# Plot specific conductance profiles for July
+(plot.spc.combo.jul <- ggplot(data = subset(unnested1.s, Event == "July"), 
+                              aes(x = Specific.conductance, colour = Site, y = Depth)) +
     geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "July",
-         x = "Salinity (PSU)",
+         x = Specific~conductance~(mu*S/cm),
          y = "Depth from surface (m)") +
+    scale_x_continuous(limits = c(0, 14500), breaks = c(0, 3500, 7000, 10500, 14000)) +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
-    scale_x_continuous(limits = c(0, 8.4), breaks = c(0, 2, 4, 6 ,8)) +
     geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
     theme(legend.position = "none"))
 
-# Plot salinity profiles for August
-(plot.sal.combo.aug <- ggplot(data = subset(unnested1.s, Event == "August"), 
-                              aes(x = Salinity, colour = Site, y = Depth)) +
+# Plot specific conductance profiles for August
+(plot.spc.combo.aug <- ggplot(data = subset(unnested1.s, Event == "August"), 
+                              aes(x = Specific.conductance, colour = Site, y = Depth)) +
     geom_path(alpha = 0.4, linewidth = 2) +
     labs(title = "August",
-         x = "Salinity (PSU)",
+         x = Specific~conductance~(mu*S/cm),
          y = "Depth from surface (m)") +
+    scale_x_continuous(limits = c(0, 14500), breaks = c(0, 3500, 7000, 10500, 14000)) +
     scale_y_reverse(limits = c(4.1,0.1), breaks = c(0, 1, 2, 3, 4)) +
-    scale_x_continuous(limits = c(0, 8.4), breaks = c(0, 2, 4, 6 ,8)) +
     geom_point(alpha = 0.4, size = 1) +
     scale_colour_discrete(name = "Sites") +
     workingtheme.depth +
@@ -1060,25 +1071,25 @@ unnested1.a$Site = with(unnested1.a, reorder(Site, Depth, FUN = max))
 # Arrange profile plots in vertical orientation
 plot.temp.combo.jul <- ggplotGrob(plot.temp.combo.jul)
 plot.temp.combo.aug <- ggplotGrob(plot.temp.combo.aug)
-plot.sal.combo.jul <- ggplotGrob(plot.sal.combo.jul)
-plot.sal.combo.aug <- ggplotGrob(plot.sal.combo.aug)
+plot.spc.combo.jul <- ggplotGrob(plot.spc.combo.jul)
+plot.spc.combo.aug <- ggplotGrob(plot.spc.combo.aug)
 plot.docon.combo.aug <- ggplotGrob(plot.docon.combo.aug)
 
 # Vertical orientation requires minor edits using a graphics editor
 figS2.c1 <- rbind(plot.temp.combo.jul,
-                  plot.sal.combo.jul,
-                  plot.sal.combo.jul)
-
+                  plot.spc.combo.jul,
+                  plot.docon.combo.aug)
+                  
 figS2.c1$widths <- unit.pmax(plot.temp.combo.jul$widths,
-                             plot.sal.combo.jul$widths,
-                             plot.sal.combo.jul$widths)
-
+                             plot.spc.combo.jul$widths,
+                             plot.docon.combo.aug$widths)
+                             
 figS2.c2 <- rbind(plot.temp.combo.aug,
-                  plot.sal.combo.aug,
+                  plot.spc.combo.aug,
                   plot.docon.combo.aug)
 
 figS2.c2$widths <- unit.pmax(plot.temp.combo.aug$widths,
-                             plot.sal.combo.aug$widths,
+                             plot.spc.combo.aug$widths,
                              plot.docon.combo.aug$widths)
 
 grid.arrange(figS2.c1, figS2.c2, ncol = 2)
@@ -1095,11 +1106,11 @@ grid.arrange(figS2.c1, figS2.c2, ncol = 2)
     facet_wrap(~reorder(Site, as.numeric(Depth))) +
     workingtheme.depth)
 
-# Plot salinity profile facet
-(plot.sal.facet <- ggplot(data = subset(unnested1.s),
-                          aes(x = Salinity, y = Depth, colour = factor(as.factor(Event)))) +
+# Plot specific conductance profile facet
+(plot.spc.facet <- ggplot(data = subset(unnested1.s),
+                          aes(x = Specific.conductance, y = Depth, colour = factor(as.factor(Event)))) +
     geom_path(alpha = 0.4, linewidth = 2) +
-    labs(x = "Salinity (PSU)",
+    labs(x = Specific~conductance~(mu*S/cm),
          y = "Depth from surface (m)") +
     scale_y_reverse() +
     scale_colour_discrete(name = "Sampling event", breaks = c("July","August","September")) +
@@ -1119,16 +1130,18 @@ grid.arrange(figS2.c1, figS2.c2, ncol = 2)
 
 ## Figure S6-S8. requires minor edits with a graphics editor
 # Prepare data
-profiles.c45 = read.table("Final_profile_data.csv", header = T, sep = ",")
+profiles.c45 = read.table("Pond_mixing_regime_profile_data.csv", header = T, sep = ",")
 profiles.c45 <- subset(profiles.c45, Site == "C45")
 
-sal.data.c45 <- subset(profiles.c45, Parameter == "Specific Conductance")
-sal.data.c45 <- mutate(sal.data.c45, Salinity = salinity(as.numeric(sal.data.c45$Value)))
+spc.data.c45 <- subset(profiles.c45, Parameter == "Specific Conductance")
+spc.data.c45 <- mutate(spc.data.c45, Salinity = salinity(as.numeric(spc.data.c45$Value)))
 
-sal.data.c45 <- sal.data.c45 %>%
-  select(Site, Depth, Event, Salinity)
+spc.data.c45 <- spc.data.c45 %>%
+  select(Site, Depth, Event, Salinity, Value)
 
-profiles.c45 <- left_join(profiles.c45, sal.data.c45, by = c("Site", "Event", "Depth"))
+spc.data.c45 <- spc.data.c45 %>% rename(Specific.conductance = Value)
+
+profiles.c45 <- left_join(profiles.c45, spc.data.c45, by = c("Site", "Event", "Depth"))
 
 # Plot temperature profile for outlier location
 (plot.temp.c45 <- ggplot(data = subset(profiles.c45, Parameter == "Water Temperature"),
@@ -1142,12 +1155,12 @@ profiles.c45 <- left_join(profiles.c45, sal.data.c45, by = c("Site", "Event", "D
     scale_colour_discrete(name = "Sampling event", breaks = c("July","August","September")) +
     workingtheme.depth)
 
-# Plot salinity profile for outlier location
-(plot.sal.c45 <- ggplot(data = subset(profiles.c45, Parameter == "Water Temperature"),
-                        aes(x = Salinity, y = Depth, colour = factor(as.factor(Event)))) +
+# Plot specific conductance profile for outlier location
+(plot.spc.c45 <- ggplot(data = subset(profiles.c45, Parameter == "Water Temperature"),
+                        aes(x = Specific.conductance, y = Depth, colour = factor(as.factor(Event)))) +
     geom_path(alpha = 0.4, linewidth = 4) +
     labs(title = "Outlier C45",
-         x = "Salinity (PSU)",
+         x = Specific~conductance~(mu*S/cm),
          y = "Depth from surface (m)") +
     scale_y_reverse() +
     geom_point(alpha = 0.4) +
@@ -1200,110 +1213,110 @@ profiles.c45 <- left_join(profiles.c45, sal.data.c45, by = c("Site", "Event", "D
 
 ## Figure S12. requires minor edits with a graphical editor
 # Run full July regression model
-model.int.wd.mean.jul.s <- glm(int.wd.mean.jul.s ~ Sal.max.scale + Surface.temperature.scale + Secchi.depth.scale + Max.depth.scale + Surface.area.scale +
-                                 Sal.max.scale:Surface.temperature.scale + Sal.max.scale:Secchi.depth.scale + Sal.max.scale:Max.depth.scale + Sal.max.scale:Surface.area.scale, data = physical.jul, family = gaussian(link = "log"))
+model.int.wd.mean.jul.s <- glm(int.wd.mean.jul.s ~ Spc.max.scale + Surface.temperature.scale + Secchi.depth.scale + Max.depth.scale + Surface.area.scale +
+                                 Spc.max.scale:Surface.temperature.scale + Spc.max.scale:Secchi.depth.scale + Spc.max.scale:Max.depth.scale + Spc.max.scale:Surface.area.scale, data = physical.jul, family = gaussian(link = "log"))
 
 # Plot July interaction plots
-(model.int.wd.mean.jul.s.salxtemp <- interact_plot(model.int.wd.mean.jul.s, pred = Sal.max.scale, modx = Surface.temperature.scale, plot.points = TRUE, 
+(model.int.wd.mean.jul.s.spcxtemp <- interact_plot(model.int.wd.mean.jul.s, pred = Spc.max.scale, modx = Surface.temperature.scale, plot.points = TRUE, 
                                                    point.size = 4, point.alpha = 0.8,
                                                    y = bquote(paste("Density change (kg/", m^3, ")")),
-                                                   x = "Max salinity",
+                                                   x = "Max conductance",
                                                    legend.main = "Temperature") + workingtheme.regressions)
 
-(model.int.wd.mean.jul.s.tempxsal <- interact_plot(model.int.wd.mean.jul.s, pred = Surface.temperature.scale, modx = Sal.max.scale, plot.points = TRUE, 
+(model.int.wd.mean.jul.s.tempxspc <- interact_plot(model.int.wd.mean.jul.s, pred = Surface.temperature.scale, modx = Spc.max.scale, plot.points = TRUE, 
                                                    point.size = 4, point.alpha = 0.8,
                                                    y = bquote(paste("Density change (kg/", m^3, ")")),
                                                    x = "Temperature",
-                                                   legend.main = "Max salinity") + workingtheme.regressions)
+                                                   legend.main = "Max conductance") + workingtheme.regressions)
 
-(model.int.wd.mean.jul.s.secchixsal <- interact_plot(model.int.wd.mean.jul.s, pred = Secchi.depth.scale, modx = Sal.max.scale, plot.points = TRUE, 
+(model.int.wd.mean.jul.s.secchixspc <- interact_plot(model.int.wd.mean.jul.s, pred = Secchi.depth.scale, modx = Spc.max.scale, plot.points = TRUE, 
                                                      point.size = 4, point.alpha = 0.8,
                                                      y = bquote(paste("Density change (kg/", m^3, ")")),
                                                      x = "Secchi depth",
-                                                     legend.main = "Max salinity") + workingtheme.regressions)
+                                                     legend.main = "Max conductance") + workingtheme.regressions)
 
-(model.int.wd.mean.jul.s.depthxsal <- interact_plot(model.int.wd.mean.jul.s, pred = Max.depth.scale, modx = Sal.max.scale, plot.points = TRUE,
+(model.int.wd.mean.jul.s.depthxspc <- interact_plot(model.int.wd.mean.jul.s, pred = Max.depth.scale, modx = Spc.max.scale, plot.points = TRUE,
                                                     point.size = 4, point.alpha = 0.8,
                                                     y = bquote(paste("Density change (kg/", m^3, ")")),
                                                     x = "Max depth",
-                                                    legend.main = "Max salinity") + workingtheme.regressions)
+                                                    legend.main = "Max conductance") + workingtheme.regressions)
 
-(model.int.wd.mean.jul.s.areaxsal <- interact_plot(model.int.wd.mean.jul.s, pred = Surface.area.scale, modx = Sal.max.scale, plot.points = TRUE,
+(model.int.wd.mean.jul.s.areaxspc <- interact_plot(model.int.wd.mean.jul.s, pred = Surface.area.scale, modx = Spc.max.scale, plot.points = TRUE,
                                                    point.size = 4, point.alpha = 0.8,
                                                    y = bquote(paste("Density change (kg/", m^3, ")")),
                                                    x = "Surface area",
-                                                   legend.main = "Max salinity") + workingtheme.regressions)
+                                                   legend.main = "Max conductance") + workingtheme.regressions)
 
 # Run full August regression model
-model.int.wd.mean.aug.s <- glm(int.wd.mean.aug.s ~ Sal.max.scale + Surface.temperature.scale + Secchi.depth.scale + Max.depth.scale + Surface.area.scale +
-                                 Sal.max.scale:Surface.temperature.scale + Sal.max.scale:Secchi.depth.scale + Sal.max.scale:Max.depth.scale + Sal.max.scale:Surface.area.scale, data = physical.aug, family = gaussian(link = "log"))
+model.int.wd.mean.aug.s <- glm(int.wd.mean.aug.s ~ Spc.max.scale + Surface.temperature.scale + Secchi.depth.scale + Max.depth.scale + Surface.area.scale +
+                                 Spc.max.scale:Surface.temperature.scale + Spc.max.scale:Secchi.depth.scale + Spc.max.scale:Max.depth.scale + Spc.max.scale:Surface.area.scale, data = physical.aug, family = gaussian(link = "log"))
 
 # Plot August interaction plots
-(model.int.wd.mean.aug.s.salxtemp <- interact_plot(model.int.wd.mean.aug.s, pred = Sal.max.scale, modx = Surface.temperature.scale, plot.points = TRUE, 
+(model.int.wd.mean.aug.s.spcxtemp <- interact_plot(model.int.wd.mean.aug.s, pred = Spc.max.scale, modx = Surface.temperature.scale, plot.points = TRUE, 
                                                    point.size = 4, point.alpha = 0.8,
                                                    y = bquote(paste("Density change (kg/", m^3, ")")),
-                                                   x = "Max salinity",
+                                                   x = "Max conductance",
                                                    legend.main = "Temperature") + workingtheme.regressions)
 
-(model.int.wd.mean.aug.s.tempxsal <- interact_plot(model.int.wd.mean.aug.s, pred = Surface.temperature.scale, modx = Sal.max.scale, plot.points = TRUE, 
+(model.int.wd.mean.aug.s.tempxspc <- interact_plot(model.int.wd.mean.aug.s, pred = Surface.temperature.scale, modx = Spc.max.scale, plot.points = TRUE, 
                                                    point.size = 4, point.alpha = 0.8,
                                                    y = bquote(paste("Density change (kg/", m^3, ")")),
                                                    x = "Temperature",
-                                                   legend.main = "Max salinity") + workingtheme.regressions)
+                                                   legend.main = "Max conductance") + workingtheme.regressions)
 
-(model.int.wd.mean.aug.s.secchixsal <- interact_plot(model.int.wd.mean.aug.s, pred = Secchi.depth.scale, modx = Sal.max.scale, plot.points = TRUE, 
+(model.int.wd.mean.aug.s.secchixspc <- interact_plot(model.int.wd.mean.aug.s, pred = Secchi.depth.scale, modx = Spc.max.scale, plot.points = TRUE, 
                                                      point.size = 4, point.alpha = 0.8,
                                                      y = bquote(paste("Density change (kg/", m^3, ")")),
                                                      x = "Secchi depth",
-                                                     legend.main = "Max salinity") + workingtheme.regressions)
+                                                     legend.main = "Max conductance") + workingtheme.regressions)
 
-(model.int.wd.mean.aug.s.depthxsal <- interact_plot(model.int.wd.mean.aug.s, pred = Max.depth.scale, modx = Sal.max.scale, plot.points = TRUE, 
+(model.int.wd.mean.aug.s.depthxspc <- interact_plot(model.int.wd.mean.aug.s, pred = Max.depth.scale, modx = Spc.max.scale, plot.points = TRUE, 
                                                     point.size = 4, point.alpha = 0.8,
                                                     y = bquote(paste("Density change (kg/", m^3, ")")),
                                                     x = "Max depth",
-                                                    legend.main = "Max salinity") + workingtheme.regressions)
+                                                    legend.main = "Max conductance") + workingtheme.regressions)
 
-(model.int.wd.mean.aug.s.areaxsal <- interact_plot(model.int.wd.mean.aug.s, pred = Surface.area.scale, modx = Sal.max.scale, plot.points = TRUE, 
+(model.int.wd.mean.aug.s.areaxspc <- interact_plot(model.int.wd.mean.aug.s, pred = Surface.area.scale, modx = Spc.max.scale, plot.points = TRUE, 
                                                    point.size = 4, point.alpha = 0.8,
                                                    y = bquote(paste("Density change (kg/", m^3, ")")),
                                                    x = "Surface area",
-                                                   legend.main = "Max salinity") + workingtheme.regressions)
+                                                   legend.main = "Max conductance") + workingtheme.regressions)
 
 # Arrange profile plots for vertical orientation
-model.int.wd.mean.jul.s.salxtemp <- ggplotGrob(model.int.wd.mean.jul.s.salxtemp)
-model.int.wd.mean.jul.s.tempxsal <- ggplotGrob(model.int.wd.mean.jul.s.tempxsal)
-model.int.wd.mean.jul.s.secchixsal <- ggplotGrob(model.int.wd.mean.jul.s.secchixsal)
-model.int.wd.mean.jul.s.depthxsal <- ggplotGrob(model.int.wd.mean.jul.s.depthxsal)
-model.int.wd.mean.jul.s.areaxsal <- ggplotGrob(model.int.wd.mean.jul.s.areaxsal)
-model.int.wd.mean.aug.s.salxtemp <- ggplotGrob(model.int.wd.mean.aug.s.salxtemp)
-model.int.wd.mean.aug.s.tempxsal <- ggplotGrob(model.int.wd.mean.aug.s.tempxsal)
-model.int.wd.mean.aug.s.secchixsal <- ggplotGrob(model.int.wd.mean.aug.s.secchixsal)
-model.int.wd.mean.aug.s.depthxsal <- ggplotGrob(model.int.wd.mean.aug.s.depthxsal)
-model.int.wd.mean.aug.s.areaxsal <- ggplotGrob(model.int.wd.mean.aug.s.areaxsal)
+model.int.wd.mean.jul.s.spcxtemp <- ggplotGrob(model.int.wd.mean.jul.s.spcxtemp)
+model.int.wd.mean.jul.s.tempxspc <- ggplotGrob(model.int.wd.mean.jul.s.tempxspc)
+model.int.wd.mean.jul.s.secchixspc <- ggplotGrob(model.int.wd.mean.jul.s.secchixspc)
+model.int.wd.mean.jul.s.depthxspc <- ggplotGrob(model.int.wd.mean.jul.s.depthxspc)
+model.int.wd.mean.jul.s.areaxspc <- ggplotGrob(model.int.wd.mean.jul.s.areaxspc)
+model.int.wd.mean.aug.s.spcxtemp <- ggplotGrob(model.int.wd.mean.aug.s.spcxtemp)
+model.int.wd.mean.aug.s.tempxspc <- ggplotGrob(model.int.wd.mean.aug.s.tempxspc)
+model.int.wd.mean.aug.s.secchixspc <- ggplotGrob(model.int.wd.mean.aug.s.secchixspc)
+model.int.wd.mean.aug.s.depthxspc <- ggplotGrob(model.int.wd.mean.aug.s.depthxspc)
+model.int.wd.mean.aug.s.areaxspc <- ggplotGrob(model.int.wd.mean.aug.s.areaxspc)
 
-figS12.c1 <- rbind(model.int.wd.mean.jul.s.salxtemp,
-                   model.int.wd.mean.jul.s.tempxsal,
-                   model.int.wd.mean.jul.s.secchixsal,
-                   model.int.wd.mean.jul.s.depthxsal,
-                   model.int.wd.mean.jul.s.areaxsal)
+figS12.c1 <- rbind(model.int.wd.mean.jul.s.spcxtemp,
+                   model.int.wd.mean.jul.s.tempxspc,
+                   model.int.wd.mean.jul.s.secchixspc,
+                   model.int.wd.mean.jul.s.depthxspc,
+                   model.int.wd.mean.jul.s.areaxspc)
 
-figS12.c1$widths <- unit.pmax(model.int.wd.mean.jul.s.salxtemp$widths,
-                              model.int.wd.mean.jul.s.tempxsal$widths,
-                              model.int.wd.mean.jul.s.secchixsal$widths,
-                              model.int.wd.mean.jul.s.depthxsal$widths,
-                              model.int.wd.mean.jul.s.areaxsal$widths)
+figS12.c1$widths <- unit.pmax(model.int.wd.mean.jul.s.spcxtemp$widths,
+                              model.int.wd.mean.jul.s.tempxspc$widths,
+                              model.int.wd.mean.jul.s.secchixspc$widths,
+                              model.int.wd.mean.jul.s.depthxspc$widths,
+                              model.int.wd.mean.jul.s.areaxspc$widths)
 
-figS12.c2 <- rbind(model.int.wd.mean.aug.s.salxtemp,
-                   model.int.wd.mean.aug.s.tempxsal,
-                   model.int.wd.mean.aug.s.secchixsal,
-                   model.int.wd.mean.aug.s.depthxsal,
-                   model.int.wd.mean.aug.s.areaxsal)
+figS12.c2 <- rbind(model.int.wd.mean.aug.s.spcxtemp,
+                   model.int.wd.mean.aug.s.tempxspc,
+                   model.int.wd.mean.aug.s.secchixspc,
+                   model.int.wd.mean.aug.s.depthxspc,
+                   model.int.wd.mean.aug.s.areaxspc)
 
-figS12.c2$widths <- unit.pmax(model.int.wd.mean.aug.s.salxtemp$widths,
-                              model.int.wd.mean.aug.s.tempxsal$widths,
-                              model.int.wd.mean.aug.s.secchixsal$widths,
-                              model.int.wd.mean.aug.s.depthxsal$widths,
-                              model.int.wd.mean.aug.s.areaxsal$widths)
+figS12.c2$widths <- unit.pmax(model.int.wd.mean.aug.s.spcxtemp$widths,
+                              model.int.wd.mean.aug.s.tempxspc$widths,
+                              model.int.wd.mean.aug.s.secchixspc$widths,
+                              model.int.wd.mean.aug.s.depthxspc$widths,
+                              model.int.wd.mean.aug.s.areaxspc$widths)
 
 grid.arrange(figS12.c1, figS12.c2, ncol = 2)
 
